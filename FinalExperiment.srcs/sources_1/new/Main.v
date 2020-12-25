@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
-// Engineer: ÕÅ·É·É
+// Engineer: 
 // 
 // Create Date: 2019/11/12 12:06:49
 // Design Name: 
@@ -20,19 +20,19 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module setclk( //½«clkËÄ·ÖÆµ
+module setclk( //å°†clkå››åˆ†é¢‘
 input clk, //100MHz
 input rst,
 output reg clk_vga  //25MHz
     );
 reg clk_temp;
-always@(posedge clk,posedge rst) //ÊµÏÖclkĞÅºÅ¶ş·ÖÆµµ½ckl_temp
+always@(posedge clk,posedge rst) //å®ç°clkä¿¡å·äºŒåˆ†é¢‘åˆ°ckl_temp
 begin
     if(rst)
         clk_temp<=0;
     else clk_temp<=~clk_temp;
 end
-always@(posedge clk_temp,posedge rst)  //½«ckl_temp¶ş·ÖÆµµ½clk_vga,×îÖÕÊ¹clkĞÅºÅËÄ·ÖÆµ
+always@(posedge clk_temp,posedge rst)  //å°†ckl_tempäºŒåˆ†é¢‘åˆ°clk_vga,æœ€ç»ˆä½¿clkä¿¡å·å››åˆ†é¢‘
 begin
     if(rst)
         clk_vga<=0;
@@ -42,70 +42,70 @@ endmodule
 
 
 module vga_top(
-input clk,  //ÏµÍ³Ê±ÖÓ
-input rst,  //Ê±ÖÓ¸´Î»¶Ë
-input [1:0] r,    //Ñ¡ÔñĞĞ
-input [1:0] c,    //Ñ¡ÔñÁĞ
+input clk,  //ç³»ç»Ÿæ—¶é’Ÿ
+input rst,  //æ—¶é’Ÿå¤ä½ç«¯
+input [1:0] r,    //é€‰æ‹©è¡Œ
+input [1:0] c,    //é€‰æ‹©åˆ—
 output [2:0] disp_RGB,
-output hs,  //ĞĞÍ¬²½ĞÅºÅ »»ĞĞµÄÊ±ÖÓĞÅºÅ
-output vs   //³¡Í¬²½ĞÅºÅ »»Ö¡µÄÊ±ÖÓĞÅºÅ
+output hs,  //è¡ŒåŒæ­¥ä¿¡å· æ¢è¡Œçš„æ—¶é’Ÿä¿¡å·
+output vs   //åœºåŒæ­¥ä¿¡å· æ¢å¸§çš„æ—¶é’Ÿä¿¡å·
 );
-reg [9:0] hcnt; //ĞĞÉ¨Ãè¼ÆÊıÆ÷
-reg [9:0] vcnt; //³¡É¨Ãè¼ÆÊıÆ÷
-reg [2:0] data; //Êı¾İ
-wire vga_clk; //½«ÒªÉú³ÉµÄvgaÊ±ÖÓ
-wire h_over; //ĞĞÉ¨Ãè½áÊøÎ»
-wire v_over; //³¡É¨Ãè½áÊøÎ»
-wire data_act; //dataÊÇ·ñÓĞĞ§£¬dataÖ»ÓĞÔÚÖĞ¼äµÄÏÔÊ¾½×¶ÎÓĞĞ§
+reg [9:0] hcnt; //è¡Œæ‰«æè®¡æ•°å™¨
+reg [9:0] vcnt; //åœºæ‰«æè®¡æ•°å™¨
+reg [2:0] data; //æ•°æ®
+wire vga_clk; //å°†è¦ç”Ÿæˆçš„vgaæ—¶é’Ÿ
+wire h_over; //è¡Œæ‰«æç»“æŸä½
+wire v_over; //åœºæ‰«æç»“æŸä½
+wire data_act; //dataæ˜¯å¦æœ‰æ•ˆï¼Œdataåªæœ‰åœ¨ä¸­é—´çš„æ˜¾ç¤ºé˜¶æ®µæœ‰æ•ˆ
 
-//VGAĞĞ¡¢³¡É¨ÃèÊ±Ğò²ÎÊı±í
-parameter hsync_end = 10'd95, //ĞĞÍ¬²½ĞÅºÅ£¨µÍµçÆ½£©½áÊøÎ» Í¬²½ĞÅºÅÎª1µÄÊ±ºò£¬¿ÉÒÔÏÔÊ¾
-hdata_begin = 10'd143, //ĞĞÏÔÊ¾¿ªÊ¼ 
-hdata_end = 10'd783, //ĞĞÏÔÊ¾½áÊø  ÖĞ¼ä640pixel dataÓĞĞ§£¬ÖĞ¼ädata_actÎªÓĞĞ§ĞÅºÅ
-hpixel_end = 10'd799, //ĞĞÏÔÊ¾Ç°ÑÓ½áÊø 
-vsync_end = 10'd1,   //³¡Í¬²½ĞÅºÅ½áÊø
-vdata_begin = 10'd34,  //³¡ÏÔÊ¾¿ªÊ¼
-vdata_end = 10'd514,   //³¡ÏÔÊ¾½áÊø  ÖĞ¼ä480pixel dataÓĞĞ§£¬data_actÎªÓĞĞ§ĞÅºÅ
-vline_end =10'd524;    //Ò»Ö¡×îºóÒ»ĞĞ
+//VGAè¡Œã€åœºæ‰«ææ—¶åºå‚æ•°è¡¨
+parameter hsync_end = 10'd95, //è¡ŒåŒæ­¥ä¿¡å·ï¼ˆä½ç”µå¹³ï¼‰ç»“æŸä½ åŒæ­¥ä¿¡å·ä¸º1çš„æ—¶å€™ï¼Œå¯ä»¥æ˜¾ç¤º
+hdata_begin = 10'd143, //è¡Œæ˜¾ç¤ºå¼€å§‹ 
+hdata_end = 10'd783, //è¡Œæ˜¾ç¤ºç»“æŸ  ä¸­é—´640pixel dataæœ‰æ•ˆï¼Œä¸­é—´data_actä¸ºæœ‰æ•ˆä¿¡å·
+hpixel_end = 10'd799, //è¡Œæ˜¾ç¤ºå‰å»¶ç»“æŸ 
+vsync_end = 10'd1,   //åœºåŒæ­¥ä¿¡å·ç»“æŸ
+vdata_begin = 10'd34,  //åœºæ˜¾ç¤ºå¼€å§‹
+vdata_end = 10'd514,   //åœºæ˜¾ç¤ºç»“æŸ  ä¸­é—´480pixel dataæœ‰æ•ˆï¼Œdata_actä¸ºæœ‰æ•ˆä¿¡å·
+vline_end =10'd524;    //ä¸€å¸§æœ€åä¸€è¡Œ
 
-parameter [2:0] R=3'b100,B=3'b001;   //²ÎÊıĞÍºìÀ¶ÑÕÉ«
-reg [2:0] y [11:0];  //´æ·ÅÃ¿¸öEµÄÑÕÉ«RGB
+parameter [2:0] R=3'b100,B=3'b001;   //å‚æ•°å‹çº¢è“é¢œè‰²
+reg [2:0] y [11:0];  //å­˜æ”¾æ¯ä¸ªEçš„é¢œè‰²RGB
 setclk myclk(
 .clk(clk),
 .rst(rst),
 .clk_vga(vga_clk)  
 );
 
-//vgaÇı¶¯³ÌĞò
-//ĞĞÉ¨Ãè
+//vgaé©±åŠ¨ç¨‹åº
+//è¡Œæ‰«æ
 always@(posedge vga_clk)
 begin
-    if(h_over)     //Èç¹ûĞĞ½áÊø±êÖ¾Îª1£¬»»ĞĞ
-        hcnt<=10'd0;  //½«ĞĞ¼ÆÊıÆ÷ÖÃ0
+    if(h_over)     //å¦‚æœè¡Œç»“æŸæ ‡å¿—ä¸º1ï¼Œæ¢è¡Œ
+        hcnt<=10'd0;  //å°†è¡Œè®¡æ•°å™¨ç½®0
     else
-        hcnt<=hcnt+10'd1;  //ĞĞ¼ÆÊı£¬Ã¿À´Ò»¸övga_clkÉÏÉıÑØ¼ÓÒ»
+        hcnt<=hcnt+10'd1;  //è¡Œè®¡æ•°ï¼Œæ¯æ¥ä¸€ä¸ªvga_clkä¸Šå‡æ²¿åŠ ä¸€
 end
-assign h_over=(hcnt==hpixel_end); //ĞĞÉ¨Ãè¼ÆÊıÆ÷Îª799£¬½«ĞĞ½áÊø±êÖ¾¸³1
+assign h_over=(hcnt==hpixel_end); //è¡Œæ‰«æè®¡æ•°å™¨ä¸º799ï¼Œå°†è¡Œç»“æŸæ ‡å¿—èµ‹1
 always@(posedge vga_clk)
 begin
-    if(h_over)    //ĞĞÉ¨Ãè¼ÆÊıµ½×îºóÒ»ĞĞ
+    if(h_over)    //è¡Œæ‰«æè®¡æ•°åˆ°æœ€åä¸€è¡Œ
     begin
-        if(v_over)  //Èç¹û³¡É¨ÃèÒ²Îª×îºóÒ»¸öÏñËØ£¬³¡¼ÆÊıÆ÷ÖØÖÃ
+        if(v_over)  //å¦‚æœåœºæ‰«æä¹Ÿä¸ºæœ€åä¸€ä¸ªåƒç´ ï¼Œåœºè®¡æ•°å™¨é‡ç½®
             vcnt<=10'd0;
         else
-            vcnt<=vcnt+10'd1;    //·ñÔò¼ÓÒ»¼ÆÊı
+            vcnt<=vcnt+10'd1;    //å¦åˆ™åŠ ä¸€è®¡æ•°
     end       
 end
-assign v_over=(vcnt==vline_end); //³¡¼ÆÊıÆ÷µÈÓÚ524£¬³¡½áÊøĞÅºÅ¸³1
+assign v_over=(vcnt==vline_end); //åœºè®¡æ•°å™¨ç­‰äº524ï¼Œåœºç»“æŸä¿¡å·èµ‹1
 
-assign data_act=((hcnt>=hdata_begin)&&(hcnt<=hdata_end)&&(vcnt>=vdata_begin)&&(vcnt<=vdata_end));//dataÊÇ·ñÏÔÊ¾£¬¼´data_actÊÇ·ñÎªÓĞĞ§
-assign hs=(hcnt>hsync_end); //ĞĞ¼ÆÊıÆ÷´óÓÚ 95 ĞĞÍ¬²½ĞÅºÅÖÃ1
-assign vs=(vcnt>vsync_end); //³¡¼ÆÊıÆ÷´óÓÚ1 £¬³¡Í¬²½ĞÅºÅÖÃ1
+assign data_act=((hcnt>=hdata_begin)&&(hcnt<=hdata_end)&&(vcnt>=vdata_begin)&&(vcnt<=vdata_end));//dataæ˜¯å¦æ˜¾ç¤ºï¼Œå³data_actæ˜¯å¦ä¸ºæœ‰æ•ˆ
+assign hs=(hcnt>hsync_end); //è¡Œè®¡æ•°å™¨å¤§äº 95 è¡ŒåŒæ­¥ä¿¡å·ç½®1
+assign vs=(vcnt>vsync_end); //åœºè®¡æ•°å™¨å¤§äº1 ï¼ŒåœºåŒæ­¥ä¿¡å·ç½®1
 assign disp_RGB=(data_act)?data:3'b000;
 
 always@(*)
 begin
-    y[0]=B;   //ÏÈÈ«²¿ÉèÖÃÎªÀ¶É«
+    y[0]=B;   //å…ˆå…¨éƒ¨è®¾ç½®ä¸ºè“è‰²
     y[1]=B;
     y[2]=B;
     y[3]=B;
@@ -117,7 +117,7 @@ begin
     y[9]=B;
     y[10]=B;
     y[11]=B;
-    case({c,r})   //¸ù¾İÑ¡ÔñµÄÎ»ÖÃÀ´¸Ä±äÔ­À´µÄÑÕÉ«
+    case({c,r})   //æ ¹æ®é€‰æ‹©çš„ä½ç½®æ¥æ”¹å˜åŸæ¥çš„é¢œè‰²
     4'b0000:y[0]=R;
     4'b0001:y[0]=R;
     4'b0010:y[1]=R;
@@ -138,7 +138,7 @@ begin
 end
 
 
-always@(*)            //ÏÔÊ¾ÇøÓò
+always@(*)            //æ˜¾ç¤ºåŒºåŸŸ
 begin
     if((hcnt>=hdata_begin+10'd28)&&(hcnt<=hdata_begin+10'd228)&&(vcnt>=vdata_begin+10'd20)&&(vcnt<=vdata_begin+10'd220))  
     begin
@@ -248,12 +248,12 @@ input up,
 input down,
 input left,
 input right,
-input [1:0] r, //Ñ¡ÔñĞĞ
-input [1:0] c, //Ñ¡ÔñÁĞ
+input [1:0] r, //é€‰æ‹©è¡Œ
+input [1:0] c, //é€‰æ‹©åˆ—
 output reg sound,
-output reg [6:0] s //µÃ·Ö
+output reg [6:0] s //å¾—åˆ†
 );
-reg bool; //±êÖ¾Î»£¬ÊÇ·ñÓĞ¾¯¸æÉù ¸ßµçÆ½ÓĞĞ§
+reg bool; //æ ‡å¿—ä½ï¼Œæ˜¯å¦æœ‰è­¦å‘Šå£° é«˜ç”µå¹³æœ‰æ•ˆ
 always@(*)
 begin
     if((c==2'b01&&r[1]==0)||(c==2'b10&&r==2'b11)||(c==2'b11&&r==2'b00))
@@ -324,10 +324,10 @@ always@(posedge clk,posedge rst)
     else
         s=s1+s2+s3+s4;
 
-//¾¯¸æÉù
+//è­¦å‘Šå£°
 reg oclk;
-parameter M=16'hC350; //·ÖÆµ²ÎÊı
-reg [16:0] cnt;  //¼ÆÊıÆ÷
+parameter M=16'hC350; //åˆ†é¢‘å‚æ•°
+reg [16:0] cnt;  //è®¡æ•°å™¨
 always@(posedge clk,posedge rst)
 begin
     if(rst)
@@ -366,7 +366,7 @@ output reg [7:0] an,
 output reg [6:0] sseg
 );
 parameter N=20;
-reg [N-1:0] cnt; //¼ÆÊıÆ÷£¬½«ÏµÍ³Ê±ÖÓclkĞÅºÅ·ÖÆµ 100MHz/1M=100Hz
+reg [N-1:0] cnt; //è®¡æ•°å™¨ï¼Œå°†ç³»ç»Ÿæ—¶é’Ÿclkä¿¡å·åˆ†é¢‘ 100MHz/1M=100Hz
 always@(posedge clk,posedge rst)
 begin
     if(rst)
@@ -411,27 +411,27 @@ begin
 end
 endmodule
 
-module Main(   //Ö÷Ä£¿é
+module Main(   //ä¸»æ¨¡å—
 input clk,
 input rst,
 input up,
 input down,
 input left,
 input right,
-input [1:0] select_of_r, //Ñ¡ÔñĞĞ
-input [1:0] select_of_c, //Ñ¡ÔñÁĞ
+input [1:0] select_of_r, //é€‰æ‹©è¡Œ
+input [1:0] select_of_c, //é€‰æ‹©åˆ—
 output sound,
 output [7:0] an,
 output [6:0] sseg,
 
 output [2:0] disp_RGB,
-output hs,  //ĞĞÍ¬²½ĞÅºÅ »»ĞĞµÄÊ±ÖÓĞÅºÅ
-output vs   //³¡Í¬²½ĞÅºÅ »»Ö¡µÄÊ±ÖÓĞÅºÅ
+output hs,  //è¡ŒåŒæ­¥ä¿¡å· æ¢è¡Œçš„æ—¶é’Ÿä¿¡å·
+output vs   //åœºåŒæ­¥ä¿¡å· æ¢å¸§çš„æ—¶é’Ÿä¿¡å·
 );
 wire [6:0] s;
 vga_top myvga(clk,rst,select_of_r,select_of_c,disp_RGB,hs,vs); 
 
-score getscore(clk,rst,up,down,left,right,select_of_r,select_of_c,sound,s);  //µ÷ÓÃ×ÓÄ£¿éscore
+score getscore(clk,rst,up,down,left,right,select_of_r,select_of_c,sound,s);  //è°ƒç”¨å­æ¨¡å—score
 display dis_s(clk,rst,s,an,sseg);
 endmodule
 
